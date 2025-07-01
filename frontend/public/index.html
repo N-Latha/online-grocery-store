@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>G-Mart | Home</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">G-Mart</div>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+     
+      <li><a href="#" onclick="requireLogin()">History</a></li>
+     <li><a id="loginLink" href="login.html">Login</a></ul></li>
+<li><a id="logoutLink" href="#" onclick="logout()" style="display:none;">Logout</a></li>
+
+      <li><a href="cart.html">MyCart</a></li>
+      <li><a href="order.html">Orders</a></li>
+      <li><a href="myorders.html">MyOrders</a></li>
+       <li><a href="products.html">Products</a></li>
+
+    
+      
+
+
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Welcome to G-Mart</h1>
+      <p>Shop fresh groceries online</p>
+      <a href="#" class="btn" onclick="showLoginForm()">Shopping Now</a>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideLoginForm()">&times;</span>
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+      <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    function showLoginForm() {
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+
+    function hideLoginForm() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    function requireLogin() {
+      if (localStorage.getItem("isLoggedIn") === "true") {
+        window.location.href = "products.html";
+      } else {
+        alert("Please login to access this page.");
+        showLoginForm();
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      alert("Logged out successfully.");
+      location.reload();
+    }
+
+    // Login Handler
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("http://localhost:5000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert("✅ Login successful!");
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("userEmail", email);
+          window.location.href = "products.html";
+        } else {
+          alert("❌ " + data.message);
+        }
+      } catch (err) {
+        console.error("Login Error:", err);
+        alert("❌ Server error. Please try again.");
+      }
+    });
+
+
+    // Check login on page load
+    window.onload = () => {
+  if (localStorage.getItem("isLoggedIn") === "true") {
+    const loginLink = document.getElementById("loginLink");
+    const logoutLink = document.getElementById("logoutLink");
+
+    if (loginLink) loginLink.style.display = "none";
+    if (logoutLink) logoutLink.style.display = "inline";
+  }
+};
+
+    
+  </script>
+
+  <!-- Style for modal -->
+  <style>
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+       display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      position: relative;
+      width: 300px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 10px;
+    }
+
+    .modal-content button {
+      width: 100%;
+      padding: 10px;
+      background-color: #0059ff;
+      color: white;
+      border: none;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+  </style>
+</body>
+</html>

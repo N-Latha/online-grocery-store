@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | G-Mart</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">G-Mart</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="login.html">MyCart</a></li>
+      <li><a href="login.html">Orders</a></li>
+      <li><a href="login.html">History</a></li>
+      <li><a href="login.html">Login</a></li>
+    </ul>
+  </nav>
+
+  <!-- Login Form -->
+  <div class="login-container">
+    <div class="login-box">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter email" required>
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+        <button type="submit">Login</button>
+      </form>
+      <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value.trim().toLowerCase();
+
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("http://localhost:5000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // ✅ Save user info to localStorage
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("firstName", data.user.firstName);
+          localStorage.setItem("userName", data.user.userName);
+          localStorage.setItem("userEmail", data.user.email);
+          
+
+          alert("✅ Login successful!");
+          window.location.href = "product.html";
+        } else {
+          alert("❌ " + data.message);
+        }
+      } catch (err) {
+        console.error("Login Error:", err);
+        alert("❌ Server error.Please try again.");
+      }
+    }
+  );
+  </script>
+</body>
+</html>

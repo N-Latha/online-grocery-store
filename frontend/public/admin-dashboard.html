@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .stat-box {
+      background: white;
+      padding: 20px 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Admin Dashboard</h2>
+
+  <div class="stats">
+    <div class="stat-box">
+      <h3 id="orderCount">Orders: 0</h3>
+    </div>
+    <div class="stat-box">
+      <h3 id="userCount">Users: 0</h3>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <h3>Add Product</h3>
+    <input type="text" id="productName" placeholder="Product Name" />
+    <input type="text" id="productRating" placeholder="Rating" />
+    <input type="number" id="productPrice" placeholder="Price" />
+    <input type="text" id="productImage" placeholder="Image File Name (e.g., apple.png)" />
+    <input type="number" id="productStock" placeholder="Count in Stock" />
+    <button onclick="addProduct()">Add Product</button>
+  </div>
+
+  <script>
+    function loadDashboardData() {
+      const orders = JSON.parse(localStorage.getItem("orders")) || [];
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      document.getElementById("orderCount").textContent = "Orders: " + orders.length;
+      document.getElementById("userCount").textContent = "Users: " + users.length;
+    }
+
+    function addProduct() {
+      const name = document.getElementById("productName").value.trim();
+      const rating = document.getElementById("productRating").value.trim();
+      const price = document.getElementById("productPrice").value.trim();
+      const image = document.getElementById("productImage").value.trim();
+      const stock = document.getElementById("productStock").value.trim();
+
+      if (!name || !price || !image || !stock) {
+        alert("Please fill all product details.");
+        return;
+      }
+
+      const products = JSON.parse(localStorage.getItem("products")) || [];
+      products.push({ name, rating, price, image, stock });
+      localStorage.setItem("products", JSON.stringify(products));
+
+      alert("Product added successfully!");
+    }
+
+    loadDashboardData();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Cart | G-Mart</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #f0f0f0; }
+    .navbar {
+      background-color: #2ecc71;
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 20px;
+      color: white;
+    }
+    .navbar .logo { font-size: 24px; font-weight: bold; }
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      padding: 0;
+    }
+    .navbar li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .cart-section {
+      padding: 20px;
+    }
+
+    .cart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .cart-card {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .cart-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .cart-card h4 { margin: 10px 0 5px; }
+    .cart-card p { color: green; font-weight: bold; }
+    .cart-card button {
+      padding: 5px 10px;
+      margin: 5px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .remove-btn { background-color: #e74c3c; color: white; }
+    .buy-btn { background-color: #007bff; color: white; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">G-Mart</div>
+    <ul>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="#">MyCart</a></li>
+      <li><a href="#">Orders</a></li>
+      <li><a href="#">History</a></li>
+      <li><a href="#">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="cart-section">
+    <h2>Your Cart</h2>
+    <div id="cartItems" class="cart-grid"></div>
+  </div>
+
+  <script>
+    
+     async function loadCartFromBackend() {
+      try{
+  const res = await fetch("http://localhost:5000/api/cart");
+  const cartNames = await res.json(); // just product names
+
+  const productsRes = await fetch("http://localhost:5000/api/products");
+  const allProducts = await productsRes.json();
+
+  const cartProducts = allProducts.filter(p => cartNames.includes(p.name));
+  renderCart(cartProducts);
+}
+
+      catch (err) {
+        console.error("Failed to fetch cart items:", err);
+      }
+    }
+    
+
+    function renderCart(products) {
+      const cartContainer = document.getElementById("cartItems");
+      cartContainer.innerHTML = "";
+
+      if (products.length === 0) {
+        cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+        return;
+      }
+
+      products.forEach(p => {
+        const item = document.createElement("div");
+        const encoded = encodeURIComponent(p.image);
+
+        item.className = "cart-card";
+        item.innerHTML = `
+          <img src="http://localhost:5000/${encoded}" alt="${p.name}" />
+          <h4>${p.name}</h4>
+          <p>₹${p.price}</p>
+          <button class="remove-btn" onclick="removeFromCart('${p.name}')">Remove</button>
+          <button class="buy-btn" onclick="buyNow('${p.name}', ${p.price})">Buy This</button>
+        `;
+        cartContainer.appendChild(item);
+      });
+    }
+     function removeFromCart(name) {
+  fetch("http://localhost:5000/api/cart", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name })
+  })
+  .then(() => loadCartFromBackend())
+  .catch(err => console.error("Failed to remove item:", err));
+}
+
+    
+
+    function buyNow(name, price) {
+      alert(`Thanks for purchasing: ${name} for ₹${price}`);
+      removeFromCart(name);
+      function buyNow(product) {
+       window.location.href = `order.html?name=${encodeURIComponent(name)}&price=${price}`;
+}
+
+      
+    }
+
+    window.onload = loadCartFromBackend;
+  </script>
+</body>
+</html>

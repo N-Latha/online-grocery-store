@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Products | G-Mart</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #f0f0f0; }
+    .navbar {
+      background-color: #2ecc71;
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 20px;
+      color: white;
+    }
+    .navbar .logo { font-size: 24px; font-weight: bold; }
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      padding: 0;
+    }
+    .navbar li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      background-color: white;
+      border-bottom: 1px solid #ccc;
+    }
+    .filters input, .filters select {
+      padding: 8px;
+      width: 48%;
+      font-size: 16px;
+    }
+
+    .product-section {
+      padding: 20px;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .product-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .product-card h4 { margin: 10px 0 5px; }
+    .product-card p { color: green; font-weight: bold; }
+    .product-card button {
+      padding: 5px 10px;
+      margin: 5px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .buy-btn { background-color: #007bff; color: white; }
+    .cart-btn { background-color: #28a745; color: white; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">G-Mart</div>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="cart.html">MyCart</a></li>
+
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="#">History</a></li>
+      <li><a href="#">Logout</a></li>
+      <li><a href="myorders.html">MyOrders</a></li>
+       
+    </ul>
+  </nav>
+
+  <div class="filters">
+    <input type="text" id="search" placeholder="Search by product name" />
+    <select id="categoryFilter">
+      <option value="all">All Categories</option>
+      <option value="fruits">Fruits</option>
+      <option value="vegetables">Vegetables</option>
+      <option value="beverages">Beverages</option>
+      <option value="dairyproducts">Dairy Products</option>
+      <option value="meat">Meat</option>
+      <option value="nuts">Nuts</option>
+      <option value="snacks">Snacks</option>
+    </select>
+  </div>
+
+  <div class="product-section" id="productSection"></div>
+<script>
+  let allProducts = [];
+
+  async function loadProducts() {
+    try {
+      const res = await fetch("http://localhost:5000/api/products");
+
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
+
+      allProducts = await res.json();
+
+      if (!Array.isArray(allProducts)) {
+        throw new Error("Response is not a product array.");
+      }
+
+      displayProducts(allProducts);
+    } catch (err) {
+      console.error("Failed to load products:", err);
+      alert("⚠️ Could not load products. Please try again later.");
+    }
+  }
+
+  function displayProducts(products) {
+    const section = document.getElementById("productSection");
+    section.innerHTML = `
+      <div class="products-grid">
+        ${products.map(p => {
+          const encodedImagePath = encodeURIComponent(p.image);
+          return `
+            <div class="product-card">
+              <img src="http://localhost:5000/${encodedImagePath}" alt="${p.name}" />
+              <h4 class="product-name">${p.name}</h4>
+<p class="product-price">₹${p.price !== undefined ? p.price : 'Not Available'}</p>
+
+           <button onclick="buyNow(this)" data-name="..." data-price="...">Buy Now</button>
+
+
+
+              <button class="cart-btn" onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+
+
+    
+  
+
+  function addToCart(product) {
+    fetch("http://localhost:5000/api/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: product.name })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(`${product.name} added to cart!`);
+    });
+  }
+
+  document.getElementById("search").addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
+    displayProducts(filtered);
+  });
+
+  document.getElementById("categoryFilter").addEventListener("change", function () {
+    const cat = this.value;
+    const filtered = (cat === "all") ? allProducts : allProducts.filter(p => p.category === cat);
+    displayProducts(filtered);
+  });
+ function attachBuyListeners() {
+  document.querySelectorAll(".buy-btn").forEach(button => {
+    button.addEventListener("click", function () {
+      const card = button.closest(".product-card");
+      const name = card.querySelector(".product-name").textContent.trim();
+      const price = card.querySelector(".product-price").textContent.replace(/[₹\s]/g, "");
+      window.location.href =`http://localhost:5000/order.html?name=${encodeURIComponent(name)}&price=${price}`;
+
+    });
+  });
+}
+
+  
+
+  window.onload = loadProducts;
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Place Your Order | G-Mart</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .navbar {
+      background-color: #2ecc71;
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 20px;
+      color: white;
+    }
+    .navbar .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      padding: 0;
+    }
+    .navbar li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background-color: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #selectedItem {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #2c3e50;
+      text-align: center;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #27ae60;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #219150;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">G-Mart</div>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="cart.html">MyCart</a></li>
+      <li><a href="myorders.html">MyOrders</a></li>
+      <li><a href="#">Orders</a></li>
+      <li><a href="#">History</a></li>
+      <li><a href="#">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h2>Place Your Order</h2>
+    <p id="selectedItem">Ordering: <span id="productName"></span> - <span id="productPrice"></span></p>
+
+    <form id="orderForm">
+      <label>First Name:
+        <input type="text" name="firstName" required />
+      </label>
+      <label>Last Name:
+        <input type="text" name="lastName" required />
+      </label>
+      <label>Phone Number:
+        <input type="tel" name="phone" required />
+      </label>
+      <label>Quantity:
+        <input type="number" name="quantity" min="1" value="1" required />
+      </label>
+      <label>Address:
+        <textarea name="address" rows="4" required></textarea>
+      </label>
+      <label>Payment Method:
+        <select name="payment" required>
+          <option value="">-- Select Payment Method --</option>
+          <option value="Cash on Delivery">Cash on Delivery</option>
+          <option value="UPI">UPI</option>
+          <option value="Card">Credit/Debit Card</option>
+        </select>
+      </label>
+      <button type="submit">Submit Order</button>
+    </form>
+  </div>
+
+  <script>
+    let item = null;
+
+    function loadProduct() {
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get("name");
+      const price = params.get("price");
+
+      if (!name || !price) {
+        alert("No product selected. Redirecting to products page.");
+        window.location.href = "products.html";
+        return;
+      }
+
+      document.getElementById("productName").textContent = name;
+      document.getElementById("productPrice").textContent = `₹${price}`;
+      item = { name, price };
+    }
+
+    loadProduct();
+
+    const form = document.getElementById("orderForm");
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      if (!item || !item.name) {
+        alert("Product info not loaded yet. Please wait.");
+        return;
+      }
+
+      const name = form.firstName.value + " " + form.lastName.value;
+      const phone = form.phone.value;
+      const quantity = form.quantity.value;
+      const address = form.address.value;
+      const payment = form.payment.value;
+      const product = item.name;
+      const price = item.price;
+      const date = new Date().toISOString();
+
+      const orderData = {
+        name,
+        phone,
+        address,
+        quantity,
+        payment,
+        product,
+        price,
+        date,
+        status: "Pending",
+        userEmail: localStorage.getItem("userEmail")
+      };
+
+      try {
+        const res = await fetch("http://localhost:5000/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderData)
+        });
+
+        const result = await res.json();
+        alert(`✅ ${result.message || "Order Created!"}\nThank you, ${name}.`);
+        form.reset();
+      } catch (err) {
+        console.error("Order submission failed:", err);
+        alert("❌ Failed to create order. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>
