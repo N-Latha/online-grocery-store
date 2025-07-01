@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Details</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background-color: #f7f7f7; }
+    .order-box {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h2 { color: #2c3e50; }
+    p { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="order-box">
+    <h2>Order Confirmation</h2>
+    <p><strong>Product:</strong> <%= order.product %></p>
+    <p><strong>Price:</strong> ₹<%= order.price %></p>
+    <p><strong>Quantity:</strong> <%= order.quantity %></p>
+    <p><strong>Payment:</strong> <%= order.payment %></p>
+    <p><strong>Address:</strong> <%= order.address %></p>
+    <p><strong>Phone:</strong> <%= order.phone %></p>
+    <p><strong>Status:</strong> <%= order.status %></p>
+    <p><strong>Ordered On:</strong> <%= new Date(order.date).toLocaleString() %></p>
+  </div>
+</body>
+</html>
